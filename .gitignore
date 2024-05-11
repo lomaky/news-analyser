@@ -55,6 +55,7 @@ amplify/backend/awscloudformation
 amplify/backend/.temp
 build/
 dist/
+articles/
 node_modules/
 aws-exports.js
 awsconfiguration.json
