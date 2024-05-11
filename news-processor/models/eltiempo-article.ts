@@ -1,5 +1,5 @@
 export interface article {
-  title?: string;  
+  title?: string;
   date?: Date;
   id?: string;
   category?: string;
@@ -9,4 +9,5 @@ export interface article {
   positive?: boolean;
   sentiment?: string;
   weight?: number;
+  thumbnail?: string;
 }

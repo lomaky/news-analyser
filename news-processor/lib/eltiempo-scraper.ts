@@ -17,11 +17,16 @@ export class ElTiempoScraper {
     }
     const { data } = (await scrapeIt(article.url, {
       // Fetch article content
-      paragraph1: ".c-detail__body > p",
-      paragraph2: ".c-detail__body > .paragraph",
+      paragraph1: ".c-detail-content > .c-detail__body > p",
+      paragraph2: ".c-detail-content > .c-detail__body > .paragraph",
+      thumbnail: {
+        selector: ".c-detail-header > figure > div > img",
+        attr: "src",
+      },
     })) as any;
     article.content =
       data.paragraph1.toString() + ". " + data.paragraph2.toString();
+    article.thumbnail = data.thumbnail ?? undefined;
 
     article.content = article.content
       .replace(/"/g, "'")
