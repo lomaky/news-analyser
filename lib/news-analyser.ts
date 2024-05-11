@@ -51,6 +51,12 @@ export class NewsAnalyser {
     if (article.content && article.content.length < 50) {
       return null;
     }
+    if (
+      article.category &&
+      article.category.trim().toLowerCase() === "lecturas dominicales"
+    ) {
+      return null;
+    }
 
     // Summarize article
     const promptSummaryRequest: chat = {

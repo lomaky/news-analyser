@@ -7,14 +7,28 @@ export class ElTiempoScraper {
   constructor() {}
 
   async getArticleContent(article: article): Promise<article | null> {
-    if (!article.url){ console.error('no url'); return null; }
+    if (!article.url) {
+      console.error("no url");
+      return null;
+    }
+    if (!article.url.toLowerCase().includes("eltiempo.com")) {
+      console.error(`unknown link (${article.url})`);
+      return null;
+    }
     const { data } = (await scrapeIt(article.url, {
       // Fetch article content
       paragraph1: ".c-detail__body > p",
       paragraph2: ".c-detail__body > .paragraph",
     })) as any;
     article.content =
-      data.paragraph1.toString() + ". " + data.paragraph2.toString();    
+      data.paragraph1.toString() + ". " + data.paragraph2.toString();
+
+    article.content = article.content
+      .replace(/"/g, "'")
+      .replace(/“/g, "'")
+      .replace(/“/g, "'")
+      .replace(/”/g, "'")
+      .replace(/[\u00a0]/g, " ");
     return article;
   }
 
