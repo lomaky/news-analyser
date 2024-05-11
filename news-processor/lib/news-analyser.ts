@@ -16,6 +16,7 @@ export class NewsAnalyser {
         negatives: 0,
         neutrals: 0,
         positiveIndex: 0,
+        updated: new Date(),
       };
 
       let weightIndex = 10000000;

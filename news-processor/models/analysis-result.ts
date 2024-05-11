@@ -7,5 +7,6 @@ export interface analysis {
   negatives: number;
   neutrals: number;
   positiveIndex: number;
+  updated: Date;
 }
 
