@@ -23,20 +23,35 @@ export class NewsAnalyser {
         articles[index].weight = Math.round(weightIndex);
         articles[index].content = undefined;
         const mod = index % 5;
-        if (mod == 0){ weightIndex = weightIndex / 2; }        
+        if (mod == 0) {
+          weightIndex = weightIndex / 2;
+        }
         analysis.articles.push(articles[index]);
-        analysis.neutrals += (articles[index].positive === undefined || articles[index].positive === null) ? 1 : 0;
+        analysis.neutrals +=
+          articles[index].positive === undefined ||
+          articles[index].positive === null
+            ? 1
+            : 0;
         analysis.positives += articles[index].positive ? 1 : 0;
         analysis.negatives += articles[index].positive === false ? 1 : 0;
       }
       analysis.total = analysis.articles.length;
-      analysis.positiveIndex = Math.round(100 - ((analysis.negatives / analysis.total) * 100));
+      analysis.positiveIndex = Math.round(
+        100 - (analysis.negatives / analysis.total) * 100
+      );
       return analysis;
     }
     return null;
   }
 
   async analyseArticle(article: article): Promise<article | null> {
+    if (!article || !article.content) {
+      return null;
+    }
+    if (article.content && article.content.length < 50) {
+      return null;
+    }
+
     // Summarize article
     const promptSummaryRequest: chat = {
       model: "eltiempo-summarizer-v1",

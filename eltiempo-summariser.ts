@@ -15,9 +15,9 @@ const main = async () => {
     if (articles?.length) {
       console.log(`Found ${articles.length} articles.`);
       // Get articles data
-      let index = 0;
       for (const article of articles) {
         try {
+          console.log(`Finding article ${article.id}`);
           // try to get article from DB
           const savedArticle = await articleDatabase.getArticle(
             article.id ?? ""
@@ -27,11 +27,7 @@ const main = async () => {
             const completeArticle =
               await eltiempoScraper.getArticleContent(article);
             // Analyse article
-            if (
-              completeArticle &&
-              completeArticle.title &&
-              completeArticle.content
-            ) {
+            if (completeArticle) {
               console.log(`Analysing new article [${completeArticle.title}]`);
               const analysedArticle =
                 await newsAnalyser.analyseArticle(article);
@@ -41,7 +37,7 @@ const main = async () => {
               }
             }
           } else {
-            console.log(`Retrieving from database [${savedArticle.title}]`);
+            console.log(`Retrieving from database [${savedArticle.title}`);
             articlesForAnalysis.push(savedArticle);
           }
         } catch (error) {

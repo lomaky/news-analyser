@@ -7,15 +7,14 @@ export class ElTiempoScraper {
   constructor() {}
 
   async getArticleContent(article: article): Promise<article | null> {
-    if (!article.url){  return null; }
-    if (!article.url.toLowerCase().includes('https://eltiempo.com/')) { return null; }
+    if (!article.url){ console.error('no url'); return null; }
     const { data } = (await scrapeIt(article.url, {
       // Fetch article content
       paragraph1: ".c-detail__body > p",
       paragraph2: ".c-detail__body > .paragraph",
     })) as any;
     article.content =
-      data.paragraph1.toString() + ". " + data.paragraph2.toString();
+      data.paragraph1.toString() + ". " + data.paragraph2.toString();    
     return article;
   }
 
