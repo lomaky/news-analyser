@@ -15,6 +15,7 @@ const main = async () => {
     if (articles?.length) {
       console.log(`Found ${articles.length} articles.`);
       // Get articles data
+      let index = 0;
       for (const article of articles) {
         try {
           // try to get article from DB
@@ -26,7 +27,11 @@ const main = async () => {
             const completeArticle =
               await eltiempoScraper.getArticleContent(article);
             // Analyse article
-            if (completeArticle && completeArticle.content) {
+            if (
+              completeArticle &&
+              completeArticle.title &&
+              completeArticle.content
+            ) {
               console.log(`Analysing new article [${completeArticle.title}]`);
               const analysedArticle =
                 await newsAnalyser.analyseArticle(article);
@@ -43,8 +48,11 @@ const main = async () => {
           console.error(error);
         }
       }
-      // Analyse
-      //const analysisResult = await newsAnalyser.generateAnalysis(articles);
+      console.log(`${articlesForAnalysis.length} articles were analysed.`);
+      // Analyse sentiment
+      const analysisResult =
+        await newsAnalyser.generateAnalysis(articlesForAnalysis);
+      console.log(analysisResult);
     } else {
       console.error("No articles to process");
     }

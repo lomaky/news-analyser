@@ -8,5 +8,5 @@ export interface article {
   summary?: string;
   positive?: boolean;
   sentiment?: string;
+  weight?: number;
 }
-

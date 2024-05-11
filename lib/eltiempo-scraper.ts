@@ -8,6 +8,7 @@ export class ElTiempoScraper {
 
   async getArticleContent(article: article): Promise<article | null> {
     if (!article.url){  return null; }
+    if (!article.url.toLowerCase().includes('https://eltiempo.com/')) { return null; }
     const { data } = (await scrapeIt(article.url, {
       // Fetch article content
       paragraph1: ".c-detail__body > p",
