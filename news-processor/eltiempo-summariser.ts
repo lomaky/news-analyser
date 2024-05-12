@@ -2,11 +2,13 @@ import { article } from "./models/eltiempo-article";
 import { ElTiempoScraper } from "./lib/eltiempo-scraper";
 import { ArticleDatabase } from "./lib/article-db";
 import { NewsAnalyser } from "./lib/news-analyser";
+import { S3uploader } from "./lib/s3-uploader";
 
 const main = async () => {
   const eltiempoScraper = new ElTiempoScraper();
   const newsAnalyser = new NewsAnalyser();
   const articleDatabase = new ArticleDatabase();
+  const s3Uploader = new S3uploader();
   const articlesForAnalysis: article[] = [];
 
   try {
@@ -49,6 +51,8 @@ const main = async () => {
       const analysisResult =
         await newsAnalyser.generateAnalysis(articlesForAnalysis);
       console.log(analysisResult);
+      // Upload to S3
+      await s3Uploader.uploadAnalysis(analysisResult!);
     } else {
       console.error("No articles to process");
     }
