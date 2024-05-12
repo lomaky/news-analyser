@@ -12,12 +12,9 @@ export default () => {
     <Container>
       <Content>
         <ThreeColRow>
-          <CopywrightNotice>Made with:</CopywrightNotice>
+          <CopywrightNotice>            
+          </CopywrightNotice>
           <CopywrightNotice>
-            <a href="https://ollama.com" target="_blank">ollama</a>, 
-            <a href="https://ai.meta.com/blog/meta-llama-3" target="_blank">llama3</a>, 
-            <a href="https://github.com/IonicaBizau/scrape-it" target="_blank">scrap-it</a>,
-            <a href="https://treact.owaiskhan.me/" target="_blank">treact</a>
           </CopywrightNotice>
           <CopywrightNotice>by @lomaky</CopywrightNotice>
         </ThreeColRow>
