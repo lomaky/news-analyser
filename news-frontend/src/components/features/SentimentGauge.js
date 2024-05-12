@@ -23,13 +23,14 @@ const Heading = tw(
 const Description = tw.p`mt-8 text-center md:text-left text-sm md:text-base lg:text-lg font-medium leading-relaxed text-secondary-100`;
 
 export default ({
-  subheading = "Our Expertise",
+  subheading = "",
   heading = (
     <>
       Designed & Developed by <span tw="text-primary-500">Professionals.</span>
     </>
   ),
   description = "",
+  positiveIndex = 1,
   textOnLeft = true,
 }) => {
   return (
@@ -38,7 +39,7 @@ export default ({
         <ImageColumn>
           <GaugeChart id="gauge-sentiment" 
             nrOfLevels={5} 
-            percent={0.65}
+            percent={positiveIndex}
             textColor="#464a4f"
             arcsLength={[0.2,0.2,0.2,0.2,0.2]}
             colors={['#ff0000', '#ff8000','#ffff00', '#80ff00', '#00ff00']}
