@@ -59,8 +59,9 @@ const LoadMoreButton = tw(PrimaryButton)`mt-16 mx-auto`;
 
 
 const Subheading = tw.span`uppercase tracking-widest font-bold text-primary-500`;
+const LastNewsUpdate = tw.div`uppercase text-xs`;
 const HighlightedText = tw.span`text-primary-500`;
-const url = 'https://news-analyser.s3.us-west-2.amazonaws.com/latest.json';
+const url = 'https://news-analyser.s3.us-west-2.amazonaws.com/latest.json?at=' + new Date().toISOString();
 const posts = [];
 
 export default () => {
@@ -114,6 +115,7 @@ export default () => {
             <Subheading>
               RESUMEN DE LAS NOTICIAS
             </Subheading>
+            <LastNewsUpdate>{new Date(analysis.updated).toDateString()}</LastNewsUpdate>
             <Posts>
               {posts.slice(0, visible).map((post, index) => (
                 <PostContainer key={index} featured={post.featured}>
