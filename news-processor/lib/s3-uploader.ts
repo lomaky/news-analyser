@@ -6,9 +6,6 @@ import {
   S3Client,
   PutObjectCommand,
   PutObjectCommandOutput,
-  PutObjectAclCommand,
-  PutObjectAclCommandOutput,
-  ObjectCannedACL,
 } from "@aws-sdk/client-s3";
 
 export class S3uploader {
@@ -31,7 +28,7 @@ export class S3uploader {
         await this.uploadFileToS3(
           Buffer.from(JSON.stringify(analysis)),
           "latest.json"
-        );        
+        );
         // upload this version
         await this.uploadFileToS3(
           Buffer.from(JSON.stringify(analysis)),
@@ -65,22 +62,4 @@ export class S3uploader {
     );
   }
 
-  private async markObjectAsPublic(
-    objectKey: string
-  ): Promise<PutObjectAclCommandOutput> {
-    const s3Client = new S3Client({
-      region: this.region,
-      credentials: {
-        accessKeyId: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey,
-      },
-    });
-    return await s3Client.send(
-      new PutObjectAclCommand({
-        Bucket: this.bucket,
-        Key: objectKey,
-        ACL: ObjectCannedACL.public_read,
-      })
-    );
-  }
 }

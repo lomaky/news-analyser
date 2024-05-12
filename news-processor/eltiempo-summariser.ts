@@ -52,7 +52,9 @@ const main = async () => {
         await newsAnalyser.generateAnalysis(articlesForAnalysis);
       console.log(analysisResult);
       // Upload to S3
+      console.log(`Uploading analysis to s3`);
       await s3Uploader.uploadAnalysis(analysisResult!);
+      console.log(`Done.`);
     } else {
       console.error("No articles to process");
     }
