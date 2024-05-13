@@ -11,7 +11,7 @@ import NoPhotoPlaceholder from "images/placeholder.png";
 
 const Posts = tw.div`mt-6 sm:-mr-8 flex flex-wrap`;
 const PostContainer = styled.div`
-  ${tw`mt-5 w-full sm:w-1/2 lg:w-1/3 sm:pr-8`}
+  ${tw`mt-5 w-full sm:w-1/2 lg:w-1/2 sm:pr-8`}
   ${props =>
     props.featured &&
     css`
@@ -20,7 +20,7 @@ const PostContainer = styled.div`
         ${tw`sm:flex-row! h-full sm:pr-4`}
       }
       ${Image} {
-        ${tw`sm:h-96 sm:min-h-full sm:w-1/2 lg:w-2/3 sm:rounded-t-none sm:rounded-l-lg`}
+        ${tw`sm:h-96 sm:min-h-full sm:w-1/2 lg:w-1/2 sm:rounded-t-none sm:rounded-l-lg`}
       }
       ${Info} {
         ${tw`sm:-mr-4 sm:pl-8 sm:flex-1 sm:rounded-none sm:rounded-r-lg sm:border-t-2 sm:border-l-0`}
@@ -60,7 +60,7 @@ const LoadMoreButton = tw(PrimaryButton)`mt-16 mx-auto`;
 
 
 const Subheading = tw.span`uppercase tracking-widest font-bold text-primary-500`;
-const LastNewsUpdate = tw.div`uppercase text-xs`;
+const LastNewsUpdate = tw.div`text-xs`;
 const HighlightedText = tw.span`text-primary-500`;
 const url = 'https://news-analyser.s3.us-west-2.amazonaws.com/latest.json?at=' + new Date().toISOString();
 const posts = [];
@@ -120,7 +120,7 @@ export default () => {
             <Subheading>
               RESUMEN DE NOTICIAS
             </Subheading>
-            <LastNewsUpdate>{new Date(analysis.updated).toDateString()}</LastNewsUpdate>
+            <LastNewsUpdate>Actualización: {new Date(analysis.updated).toDateString()} - {new Date(analysis.updated).toLocaleTimeString()}</LastNewsUpdate>
             <Posts>
               {posts.slice(0, visible).map((post, index) => (
                 <PostContainer key={index} featured={post.featured}>
