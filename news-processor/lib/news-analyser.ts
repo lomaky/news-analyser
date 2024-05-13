@@ -121,4 +121,20 @@ export class NewsAnalyser {
 
     return article;
   }
+
+  async validArticle(article: article): Promise<boolean> {
+    if (article){
+      // Validate is not commercial
+      if (
+        article.category &&
+        article.category.toLowerCase().trim() === "contenido comercial"
+      ) {
+        console.log('Removed: Commercial content')
+        return false;
+      }
+      // Passed all validations
+      return true;
+    }
+    return false;
+  }
 }

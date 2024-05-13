@@ -30,12 +30,14 @@ const main = async () => {
               await eltiempoScraper.getArticleContent(article);
             // Analyse article
             if (completeArticle) {
-              console.log(`Analysing new article [${completeArticle.title}]`);
-              const analysedArticle =
-                await newsAnalyser.analyseArticle(article);
-              if (analysedArticle) {
-                articleDatabase.saveArticle(analysedArticle);
-                articlesForAnalysis.push(analysedArticle);
+              if (await newsAnalyser.validArticle(completeArticle)) {
+                console.log(`Analysing new article [${completeArticle.title}]`);
+                const analysedArticle =
+                  await newsAnalyser.analyseArticle(article);
+                if (analysedArticle) {
+                  articleDatabase.saveArticle(analysedArticle);
+                  articlesForAnalysis.push(analysedArticle);
+                }
               }
             }
           } else {
