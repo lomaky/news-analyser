@@ -65,7 +65,7 @@ export class NewsAnalyser {
       messages: [
         {
           role: "user",
-          content: "Puedes resumir la siguiente noticia?",
+          content: "Puedes resumir la siguiente noticia en español?",
         },
         {
           role: "assistant",
