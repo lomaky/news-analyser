@@ -19,30 +19,36 @@ const main = async () => {
       // Get articles data
       for (const article of articles) {
         try {
-          console.log(`Finding article ${article.id}`);
-          // try to get article from DB
-          const savedArticle = await articleDatabase.getArticle(
-            article.id ?? ""
-          );
-          if (!savedArticle) {
-            // visit article and get content
-            const completeArticle =
-              await eltiempoScraper.getArticleContent(article);
-            // Analyse article
-            if (completeArticle) {
-              if (await newsAnalyser.validArticle(completeArticle)) {
-                console.log(`Analysing new article [${completeArticle.title}]`);
-                const analysedArticle =
-                  await newsAnalyser.analyseArticle(article);
-                if (analysedArticle) {
-                  articleDatabase.saveArticle(analysedArticle);
-                  articlesForAnalysis.push(analysedArticle);
+          const isArticleInList =
+            articlesForAnalysis.filter((a) => a.id === article.id).length > 0;
+          if (!isArticleInList) {
+            console.log(`Finding article ${article.id}`);
+            // try to get article from DB
+            const savedArticle = await articleDatabase.getArticle(
+              article.id ?? ""
+            );
+            if (!savedArticle) {
+              // visit article and get content
+              const completeArticle =
+                await eltiempoScraper.getArticleContent(article);
+              // Analyse article
+              if (completeArticle) {
+                if (await newsAnalyser.validArticle(completeArticle)) {
+                  console.log(
+                    `Analysing new article [${completeArticle.title}]`
+                  );
+                  const analysedArticle =
+                    await newsAnalyser.analyseArticle(article);
+                  if (analysedArticle) {
+                    articleDatabase.saveArticle(analysedArticle);
+                    articlesForAnalysis.push(analysedArticle);
+                  }
                 }
               }
+            } else {
+              console.log(`Retrieving from database [${savedArticle.title}`);
+              articlesForAnalysis.push(savedArticle);
             }
-          } else {
-            console.log(`Retrieving from database [${savedArticle.title}`);
-            articlesForAnalysis.push(savedArticle);
           }
         } catch (error) {
           console.error(error);
