@@ -86,7 +86,10 @@ export class NewsAnalyser {
     const summaryResponse = (await summaryResult.json())?.message?.content as
       | string
       | undefined;
-    article.summary = summaryResponse;
+
+    const cleanSummary = this.cleanSummary(summaryResponse ?? "");
+
+    article.summary = cleanSummary;
 
     // Analize sentiment
     const promptSentimentRequest: chat = {
@@ -123,18 +126,100 @@ export class NewsAnalyser {
   }
 
   async validArticle(article: article): Promise<boolean> {
-    if (article){
+    if (article) {
       // Validate is not commercial
       if (
         article.category &&
         article.category.toLowerCase().trim() === "contenido comercial"
       ) {
-        console.log('Removed: Commercial content')
+        console.log("Removed: Commercial content");
         return false;
       }
       // Passed all validations
       return true;
     }
     return false;
+  }
+
+  cleanSummary(summary: string) {
+    const bin = [
+      "¡Claro! Aquí te dejo un resumen de la noticia en español:",
+      "¡Claro! Aquí te dejo un resumen en español de la noticia:",
+      "¡Claro! Aquí te presento una breve reseña de la noticia:",
+      "¡Claro! Aquí tienes la noticia resumida en español:",
+      "¡Claro! Aquí te presento un resumen de la noticia:",
+      "¡Claro! Aquí te presento una resumen de la noticia:",
+      "¡Claro! Aquí te presento la noticia en español:",
+      "¡Claro! Aquí te dejo un resumen de la noticia:",
+      "¡Claro! Aquí te dejo el resumen de la noticia:",
+      "¡Claro! Aquí te dejo la resumen de la noticia:",
+      "¡Claro! Aquí te presento la noticia resumida:",
+      "¡Claro! Te resumo la noticia sobre",
+      "¡Claro! Aquí te resumo la noticia:",
+      "¡Claro! Te resumo la noticia:",
+
+      "¡Excelente elección! Aquí te presento la resumen en español:",
+      "¡Excelente elección! Aquí te presento una resumen de la noticia:",
+      "¡Excelente elección! Aquí te presento un resumen de la noticia:",
+      "¡Excelente elección de noticia!\n\nResumo:",
+      "Excelente noticia!\n\nResumen:",
+      "¡Excelente elección!",
+      "¡Excelente noticia!",
+
+      "¡Listo! Aquí te presento una resumen de la noticia:",
+      "¡Listo! Aquí te presento un resumen de la noticia:",
+      "¡Listo! Aquí te dejo una resumen de la noticia:",
+      "¡Listo! Aquí tienes un resumen de la noticia:",
+      "¡Listo! Aquí te presento la noticia resumida:",
+
+      "¡Genial! Aquí te dejo una breve reseña en español de la noticia:",
+
+      "Aquí te dejo una breve reseña en español de la noticia:",
+      "Aquí te presento una resumen de la noticia en español:",
+      "Aquí te dejo un resumen en español de la noticia:",
+      "Aquí te dejo un resumen de la noticia en español:",
+      "Aquí te dejo la resumen de la noticia en español:",
+      "Aquí te presento una breve reseña de la noticia:",
+      "Aquí tienes la noticia resumida en español:",
+      "Aquí te presento una resumen de la noticia:",
+      "Aquí te presento un resumen de la noticia:",
+      "Aquí te dejo una resumen de la noticia:",
+      "Aquí te presento la resumen en español:",
+      "Aquí te presento la noticia en español:",
+      "Aquí te dejo la resumen de la noticia:",
+      "Aquí te dejo el resumen de la noticia:",
+      "Aquí te dejo un resumen de la noticia:",
+      "Aquí te presento la noticia resumida:",
+      "Aquí tienes un resumen de la noticia:",
+      "Aquí te resumo la noticia:",
+
+      "¡Lo siento mucho! La noticia es muy trágica. Aquí te resumo lo más importante:",
+      "¡Lo siento! Me parece que tienes una gran noticia para mí. Aquí te resumo:",
+      "¡Lo siento mucho! La noticia es muy trágica.",
+      "¡Lo siento mucho! La noticia es trágica.",
+
+      "¡Hola! Eres un agente que resume noticias de eltiempo.com.",
+      "Un agente que resume noticias de eltiempo.com",
+      "¡Vaya cambio de tema!",
+      "Resumen de la noticia:",
+      "Noticias de El Tiempo:",
+      "Te resumo la noticia:",
+      "Resumo de la noticia:",
+      "¡Lo siento mucho!",
+      "¡Genial noticia!",
+      "¡Vaya noticia!",
+      "¡Genial!",
+      "¡Claro!",
+      "¡Listo!",
+    ];
+
+    let cleanSummary = summary;
+    for (const rubish of bin) {
+      if (cleanSummary.includes(rubish)) {
+        console.log(`Limpiando: ${rubish}`);
+        cleanSummary = cleanSummary.replace(rubish, "");
+      }
+    }
+    return cleanSummary.trim();
   }
 }

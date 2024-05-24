@@ -47,6 +47,7 @@ const main = async () => {
               }
             } else {
               console.log(`Retrieving from database [${savedArticle.title}`);
+              savedArticle.summary = newsAnalyser.cleanSummary(savedArticle.summary??'');
               articlesForAnalysis.push(savedArticle);
             }
           }
