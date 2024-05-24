@@ -1,11 +1,11 @@
 import { article } from "./models/eltiempo-article";
-import { ElTiempoScraper } from "./lib/eltiempo-scraper";
+import { ElTiempoScraperV2 } from "./lib/eltiempo-scraper-v2";
 import { ArticleDatabase } from "./lib/article-db";
 import { NewsAnalyser } from "./lib/news-analyser";
 import { S3uploader } from "./lib/s3-uploader";
 
 const main = async () => {
-  const eltiempoScraper = new ElTiempoScraper();
+  const eltiempoScraper = new ElTiempoScraperV2();
   const newsAnalyser = new NewsAnalyser();
   const articleDatabase = new ArticleDatabase();
   const s3Uploader = new S3uploader();
