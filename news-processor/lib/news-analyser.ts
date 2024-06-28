@@ -61,16 +61,12 @@ export class NewsAnalyser {
 
     // Summarize article
     const promptSummaryRequest: chat = {
-      model: "gemma2",
+      model: "llama3",
       messages: [
         {
-          role: "user",
-          content: "Puedes resumir la siguiente noticia en español?",
-        },
-        {
-          role: "assistant",
+          role: "system",
           content:
-            "Sí! Estoy listo para suminizar la noticia para ti.\n\n¿Cuál es la noticia que deseas que yo resuma?",
+            "Eres un agente que resume noticias en español, resume la siguiente noticia.",
         },
         {
           role: "user",
@@ -93,16 +89,16 @@ export class NewsAnalyser {
 
     // Analize sentiment
     const promptSentimentRequest: chat = {
-      model: "gemma2",
+      model: "llama3",
       messages: [
         {
-          role: "user",
-          content: article.content ?? "",
+          role: "system",
+          content:
+            "Eres un agente que clasifica una noticia como positiva o negativa y entrega el resultado en un objeto JSON. Clasifica la siguiente noticia y retorna la información en JSON con la siguiente propiedad - sentimiento <positiva|neutra|negativa> Sentimiento de la noticia.",
         },
         {
           role: "user",
-          content:
-            "En una sola palabra, la noticia anterior es positiva o negativa?",
+          content: article.content ?? "",
         },
       ],
       stream: false,
@@ -116,9 +112,13 @@ export class NewsAnalyser {
       ?.content as string | undefined;
     article.sentiment = sentimentResponse;
     if (sentimentResponse?.toLowerCase().includes("positiv")) {
+      article.sentiment = "positiva";
       article.positive = true;
-    }
-    if (sentimentResponse?.toLowerCase().includes("negativ")) {
+    } else if (sentimentResponse?.toLowerCase().includes("negativ")) {
+      article.sentiment = "negativa";
+      article.positive = false;
+    } else {
+      article.sentiment = "neutra";
       article.positive = false;
     }
 
