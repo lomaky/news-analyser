@@ -61,7 +61,7 @@ export class NewsAnalyser {
 
     // Summarize article
     const promptSummaryRequest: chat = {
-      model: "eltiempo-summarizer-v1",
+      model: "gemma2",
       messages: [
         {
           role: "user",
