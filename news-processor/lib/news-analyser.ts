@@ -93,7 +93,7 @@ export class NewsAnalyser {
 
     // Analize sentiment
     const promptSentimentRequest: chat = {
-      model: "eltiempo-sentiment-v1",
+      model: "gemma2",
       messages: [
         {
           role: "user",
