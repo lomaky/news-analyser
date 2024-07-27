@@ -61,7 +61,7 @@ export class NewsAnalyser {
 
     // Summarize article
     const promptSummaryRequest: chat = {
-      model: "llama3",
+      model: "llama3.1",
       messages: [
         {
           role: "system",
@@ -89,7 +89,7 @@ export class NewsAnalyser {
 
     // Analize sentiment
     const promptSentimentRequest: chat = {
-      model: "llama3",
+      model: "llama3.1",
       messages: [
         {
           role: "system",
