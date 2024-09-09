@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "declaration": false,
+    "target": "ES2022",
+    "module": "commonJS",
+    "strict": true,
+    "noImplicitAny": false
+  }
+}
