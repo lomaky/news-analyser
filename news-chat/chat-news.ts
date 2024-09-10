@@ -1,8 +1,9 @@
+const express = require("express");
+import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChromaClient, GoogleGenerativeAiEmbeddingFunction } from "chromadb";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const main = async () => {
-
+const queryRag = async (query: string) => {
   const googleKey = "GOOGLE_KEY_HERE";
   // embeddings
   const googleEmbeddings = new GoogleGenerativeAiEmbeddingFunction({
@@ -24,16 +25,36 @@ const main = async () => {
     embeddingFunction: googleEmbeddings,
   });
 
-  const query = "Como participó Euclides Torres en las elecciones de Gustavo Petro?";
-
   // Query
   const results = await vectorDb.query({
     queryTexts: [query],
-    nResults: 20,    
+    nResults: 20,
   });
 
+  // Compose response
   const genAI = new GoogleGenerativeAI(googleKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const safetySettings = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_NONE,
+    },
+  ];
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    safetySettings: safetySettings,
+  });
 
   const prompt = `
   Eres un agente que busca noticias y responde a los usuarios. 
@@ -49,7 +70,24 @@ const main = async () => {
   ${JSON.stringify(results)}`;
 
   const result = await model.generateContent(prompt);
-  console.log(result.response.text());
+  const response = result.response.text();
+  console.log(response);
+  return response;
 };
 
-main();
+const app = express();
+app.use(express.json());
+const PORT = 9700;
+app.listen(PORT, () => {
+  console.log("Server Listening on port:", PORT);
+});
+
+app.get("/search", async (request, response) => {
+  const dbResponse = await queryRag(request.query.query);
+  const ragResponse = {
+    Query: request.query.query,
+    Response: dbResponse,
+  };
+
+  response.send(ragResponse);
+});
