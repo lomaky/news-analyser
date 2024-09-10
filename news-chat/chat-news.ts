@@ -1,10 +1,11 @@
 const express = require("express");
+var cors = require("cors");
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChromaClient, GoogleGenerativeAiEmbeddingFunction } from "chromadb";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const queryRag = async (query: string) => {
-  const googleKey = "GOOGLE_KEY_HERE";
+    const googleKey = "GOOGLE_KEY_HERE";
   // embeddings
   const googleEmbeddings = new GoogleGenerativeAiEmbeddingFunction({
     googleApiKey: googleKey,
@@ -57,17 +58,22 @@ const queryRag = async (query: string) => {
   });
 
   const prompt = `
-  Eres un agente que busca noticias y responde a los usuarios. 
-  
-  Responde la siguente pregunta de un usuario 
-  con el resultado de la busqueda en la base de datos de vectores
-  -----------
-  Pregunta usuario: ${query}
+  <INSTRUCCIONES DEL PROMPT>
+  Eres un agente que busca noticias y responde a los usuarios.   
+  Responde la siguente pregunta de un usuario usando el resultado de la busqueda a continuacion.
+  Usa un lenguaje amigable e impersonal.
+  Omite links a paginas web.
+  Limitate a solo responder y no hacer preguntas adicionales.
+  </INSTRUCCIONES DEL PROMPT>
 
-  -----------
-  Resultados de la busqueda:
+  <PREGUNTA DEL USUARIO>
+  ${query}
+  </PREGUNTA DEL USUARIO>
 
-  ${JSON.stringify(results)}`;
+  <RESULTADOS BUSQUEDA NOTICIAS>
+  ${JSON.stringify(results)}  
+  </RESULTADOS BUSQUEDA NOTICIAS>
+  `;
 
   const result = await model.generateContent(prompt);
   const response = result.response.text();
@@ -82,7 +88,7 @@ app.listen(PORT, () => {
   console.log("Server Listening on port:", PORT);
 });
 
-app.get("/search", async (request, response) => {
+app.get("/search", cors(), async (request, response) => {
   const dbResponse = await queryRag(request.query.query);
   const ragResponse = {
     Query: request.query.query,

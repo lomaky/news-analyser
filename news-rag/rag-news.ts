@@ -67,6 +67,7 @@ const main = async () => {
         });
 
         console.log(`Vectorized: ${article.title!}`);
+        await new Promise((resolve) => setTimeout(resolve, 200));
       } else {
         console.log(`Already vectorized: ${article.title!}`);
       }

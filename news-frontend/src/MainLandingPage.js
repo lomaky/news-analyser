@@ -8,6 +8,8 @@ import Footer from "components/footers/FiveColumnWithInputForm.js";
 import { PrimaryButton } from "components/misc/Buttons";
 import SentimentGauge from "components/features/SentimentGauge";
 import NoPhotoPlaceholder from "images/placeholder.png";
+import Chatbot from "components/chatbot";
+
 
 const Posts = tw.div`mt-6 sm:-mr-8 flex flex-wrap`;
 const PostContainer = styled.div`
@@ -100,41 +102,61 @@ export default () => {
   return (
     <AnimationRevealPage>
       <Container>
+        <Chatbot />
         {analysis && (
-          <ContentWithPaddingSm> 
+          <ContentWithPaddingSm>
             <SentimentGauge
-              positiveIndex={analysis.positiveIndex/100}
+              positiveIndex={analysis.positiveIndex / 100}
               subheading={<Subheading>INDICE POSITIVISMO</Subheading>}
               heading={
                 <>
-                  Hoy las noticias de Colombia están <br/> <HighlightedText>{analysis.positiveIndex}%</HighlightedText> positivas
+                  Hoy las noticias de Colombia están <br />{" "}
+                  <HighlightedText>{analysis.positiveIndex}%</HighlightedText>{" "}
+                  positivas
                 </>
               }
               description={
-                        <>
-                          Constantemente calculamos el índice de positivismo de Colombia haciendo un análisis de sentimiento de las noticias con &nbsp;
-                          <AISummaryTitle>Inteligencia Artificial.</AISummaryTitle>
-                        </>
+                <>
+                  Constantemente calculamos el índice de positivismo de Colombia
+                  haciendo un análisis de sentimiento de las noticias con &nbsp;
+                  <AISummaryTitle>Inteligencia Artificial.</AISummaryTitle>
+                </>
               }
             />
-            <Subheading>
-              RESUMEN DE NOTICIAS
-            </Subheading>
-            <LastNewsUpdate>Actualización: {new Date(analysis.updated).toDateString()} - {new Date(analysis.updated).toLocaleTimeString()}</LastNewsUpdate>
+            <Subheading>RESUMEN DE NOTICIAS</Subheading>
+            <LastNewsUpdate>
+              Actualización: {new Date(analysis.updated).toDateString()} -{" "}
+              {new Date(analysis.updated).toLocaleTimeString()}
+            </LastNewsUpdate>
             <Posts>
               {posts.slice(0, visible).map((post, index) => (
                 <PostContainer key={index} featured={post.featured}>
-                  <Post className="group" as="a" href={post.url} target="_blank">
+                  <Post
+                    className="group"
+                    as="a"
+                    href={post.url}
+                    target="_blank"
+                  >
                     <Image imageSrc={post.imageSrc} />
                     <Info>
                       <Category>{post.category}</Category>
-                      {post.positive && (<PositiveBadge>{post.sentiment}</PositiveBadge> )}
-                      {post.negative && (<NegativeBadge>{post.sentiment}</NegativeBadge> )}
-                      {post.neutral && (<NeutralBadge>{post.sentiment??'Neutral'}</NeutralBadge> )}
+                      {post.positive && (
+                        <PositiveBadge>{post.sentiment}</PositiveBadge>
+                      )}
+                      {post.negative && (
+                        <NegativeBadge>{post.sentiment}</NegativeBadge>
+                      )}
+                      {post.neutral && (
+                        <NeutralBadge>
+                          {post.sentiment ?? "Neutral"}
+                        </NeutralBadge>
+                      )}
                       <CreationDate>{post.date}</CreationDate>
                       <Title>{post.title}</Title>
                       <AISummaryTitle>Resumen IA</AISummaryTitle>
-                      {post.description && <Description>{post.description}</Description>}
+                      {post.description && (
+                        <Description>{post.description}</Description>
+                      )}
                     </Info>
                   </Post>
                 </PostContainer>
@@ -142,15 +164,15 @@ export default () => {
             </Posts>
             {visible < posts.length && (
               <ButtonContainer>
-                <LoadMoreButton onClick={onLoadMoreClick}>Ver mas noticias</LoadMoreButton>
+                <LoadMoreButton onClick={onLoadMoreClick}>
+                  Ver mas noticias
+                </LoadMoreButton>
               </ButtonContainer>
             )}
           </ContentWithPaddingSm>
         )}
       </Container>
-      {analysis && (
-        <Footer />
-      )}
+      {analysis && <Footer />}
     </AnimationRevealPage>
   );
 };

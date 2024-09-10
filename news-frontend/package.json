@@ -17,6 +17,7 @@
     "react-rnd": "^10.3.7",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
+    "react-simple-chatbot": "^0.6.1",
     "react-slick": "^0.29.0",
     "slick-carousel": "^1.8.1",
     "styled-components": "^5.3.5",
