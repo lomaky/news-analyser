@@ -1,4 +1,4 @@
-import React, { Component, createRef } from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 import ChatBot, { Loading } from "react-simple-chatbot";
 import { ThemeProvider } from "styled-components";

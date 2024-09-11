@@ -5,7 +5,7 @@ import { ChromaClient, GoogleGenerativeAiEmbeddingFunction } from "chromadb";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const queryRag = async (query: string) => {
-    const googleKey = "GOOGLE_KEY_HERE";
+  const googleKey = "GOOGLE_KEY_HERE";
   // embeddings
   const googleEmbeddings = new GoogleGenerativeAiEmbeddingFunction({
     googleApiKey: googleKey,
@@ -21,7 +21,7 @@ const queryRag = async (query: string) => {
   console.log(`VectorDb=${vectorDbName}`);
 
   // Get or create new VectorDB collection
-  const vectorDb = await client.getOrCreateCollection({
+  const vectorDb = await client.getCollection({
     name: vectorDbName,
     embeddingFunction: googleEmbeddings,
   });
@@ -57,13 +57,21 @@ const queryRag = async (query: string) => {
     safetySettings: safetySettings,
   });
 
+  const todaysDate = new Date().toJSON();
+
   const prompt = `
   <INSTRUCCIONES DEL PROMPT>
   Eres un agente que busca noticias y responde a los usuarios.   
   Responde la siguente pregunta de un usuario usando el resultado de la busqueda a continuacion.
   Usa un lenguaje amigable e impersonal.
-  Omite links a paginas web.
-  Limitate a solo responder y no hacer preguntas adicionales.
+  
+  Al responder sigue las siguentes reglas.
+  - Omite links a paginas web.
+  - Limitate a solo responder y no hacer preguntas adicionales.
+  - Responde usando la información mas reciente.
+  - La fecha de hoy es ${todaysDate}.
+  - Limitate responder unicamente usando la información del resultado de la busqueda.
+
   </INSTRUCCIONES DEL PROMPT>
 
   <PREGUNTA DEL USUARIO>
@@ -75,7 +83,9 @@ const queryRag = async (query: string) => {
   </RESULTADOS BUSQUEDA NOTICIAS>
   `;
 
+
   const result = await model.generateContent(prompt);
+  console.log(prompt);
   const response = result.response.text();
   console.log(response);
   return response;
