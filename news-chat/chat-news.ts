@@ -101,14 +101,11 @@ export class Gemini {
     ];
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
+      systemInstruction: system,
       safetySettings: safetySettings,
     });
 
     const geminiPrompt = `
-    <INSTRUCCIONES DEL PROMPT>
-    ${system}
-    </INSTRUCCIONES DEL PROMPT>
-
     <PREGUNTA DEL USUARIO>
     ${question}
     </PREGUNTA DEL USUARIO>
