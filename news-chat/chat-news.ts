@@ -1,12 +1,13 @@
 const express = require("express");
 var cors = require("cors");
+import { DateTime } from "luxon";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChromaClient, GoogleGenerativeAiEmbeddingFunction } from "chromadb";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Parameters
 const googleKey = "GOOGLE_KEY_HERE";
-const vectorDbName = `news-text-embedding-004-v20240914.vdb`;
+const vectorDbName = `news-text-embedding-004-v20240914_001.vdb`;
 const llmChatEndpoint = "http://localhost:11434/api/chat";
 const chromadb = "http://192.168.86.100:8000";
 const textEmbedding = "text-embedding-004";
@@ -147,10 +148,10 @@ const queryRag = async (question: string) => {
   // Query
   const searchResults = await vectorDb.query({
     queryTexts: [question],
-    nResults: 20,
+    nResults: 15,
   });
 
-  const todaysDate = new Date().toJSON();
+  const todaysDate = new DateTime(new Date()).setZone("America/Bogota").setLocale("es").toLocaleString(DateTime.DATE_HUGE);
 
   const system = `
   Eres un agente que busca noticias y responde a los usuarios.   

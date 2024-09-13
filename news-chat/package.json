@@ -6,6 +6,7 @@
     "chromadb-default-embed": "^2.13.2",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "luxon": "^3.5.0",
     "openai": "^4.58.1"
   },
   "devDependencies": {
