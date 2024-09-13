@@ -5,8 +5,8 @@ import { ChromaClient, GoogleGenerativeAiEmbeddingFunction } from "chromadb";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Parameters
-const googleKey = "GOOGLE_KEY_HERE";
-const vectorDbName = `news-text-embedding-004.vdb`;
+const googleKey = "AIzaSyC-AvyDgaIloPOHRKtjYgNDPXuU9gO2nO0";
+const vectorDbName = `news-text-embedding-004-v20240914.vdb`;
 const llmChatEndpoint = "http://localhost:11434/api/chat";
 const chromadb = "http://192.168.86.100:8000";
 const textEmbedding = "text-embedding-004";
@@ -106,6 +106,10 @@ export class Gemini {
     });
 
     const geminiPrompt = `
+    <INSTRUCCIONES DEL PROMPT>
+    ${system}
+    </INSTRUCCIONES DEL PROMPT>
+
     <PREGUNTA DEL USUARIO>
     ${question}
     </PREGUNTA DEL USUARIO>
