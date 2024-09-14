@@ -151,7 +151,10 @@ const queryRag = async (question: string) => {
     nResults: 15,
   });
 
-  const todaysDate = new DateTime(new Date()).setZone("America/Bogota").setLocale("es").toLocaleString(DateTime.DATE_HUGE);
+  const todaysDate = new DateTime(new Date())
+    .setZone("America/Bogota")
+    .setLocale("es")
+    .toLocaleString(DateTime.DATE_HUGE);
 
   const system = `
   Eres un agente que busca noticias y responde a los usuarios.   
@@ -164,7 +167,6 @@ const queryRag = async (question: string) => {
   - Responde usando la información mas reciente.
   - La fecha de hoy es ${todaysDate}.
   - Limitate responder unicamente usando la información del resultado de la busqueda.
-  - Si no encuentras información en el resultado de la busqueda, responde con 'Lo siento, solo te puedo responder preguntas relacionadas a las noticias'
   - Responde siempre en Español
   `;
 
@@ -203,11 +205,23 @@ app.listen(PORT, () => {
 });
 
 app.get("/search", cors(), async (request, response) => {
-  const dbResponse = await queryRag(request.query.query);
-  const ragResponse = {
-    Query: request.query.query,
-    Response: dbResponse,
-  };
-
-  response.send(ragResponse);
+  try {
+    const dbResponse = await queryRag(request.query.query);
+    const ragResponse = {
+      Query: request.query.query,
+      Response: dbResponse,
+    };
+    response.send(ragResponse);
+  } catch (error) {
+    try {
+      console.error(error);
+      response.send({
+        Query: request?.query?.query ?? "",
+        Response:
+          "Lo siento, en este momento no puedo responder esta pregunta, intenta mas tarde o intenta una pregunta distinta.",
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
 });
