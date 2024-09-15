@@ -29,9 +29,10 @@ export interface message {
   role: string;
   content: string;
 }
-
 export class Ollama {
-  constructor() {}
+  constructor() {
+    console.log({ llm: "ollama" });
+  }
 
   async answerQuestion(
     system: string,
@@ -42,11 +43,9 @@ export class Ollama {
     ${question}
 
     <RESULTADOS BUSQUEDA NOTICIAS>
-    ${JSON.stringify(searchResults)}  
+    ${searchResults}  
     </RESULTADOS BUSQUEDA NOTICIAS>
     `;
-    console.log(system);
-
     const promptSummaryRequest: chat = {
       model: "llama3.1",
       messages: [
@@ -74,7 +73,9 @@ export class Ollama {
 }
 
 export class Gemini {
-  constructor() {}
+  constructor() {
+    console.log({ llm: "gemini" });
+  }
 
   async answerQuestion(
     system: string,
@@ -116,13 +117,13 @@ export class Gemini {
     </PREGUNTA DEL USUARIO>
 
     <RESULTADOS BUSQUEDA NOTICIAS>
-    ${JSON.stringify(searchResults)}  
+    ${searchResults}  
     </RESULTADOS BUSQUEDA NOTICIAS>
     `;
-    console.log(geminiPrompt);
 
     const result = await model.generateContent(geminiPrompt);
     const response = result.response.text();
+    console.log({ tokens: result.response.usageMetadata.totalTokenCount });
     return response;
   }
 }
@@ -151,6 +152,22 @@ const queryRag = async (question: string) => {
     nResults: 15,
   });
 
+  let vectorDbResult = "";
+
+  if (
+    searchResults.documents &&
+    searchResults.documents.length &&
+    searchResults.documents[0].length
+  ) {
+    console.log({ vectorResults: searchResults.documents[0].length });
+    for (const document of searchResults.documents[0]) {
+      vectorDbResult += `
+---
+${document}
+`;
+    }
+  }
+
   const todaysDate = new DateTime(new Date())
     .setZone("America/Bogota")
     .setLocale("es")
@@ -158,6 +175,7 @@ const queryRag = async (question: string) => {
 
   const system = `
   Eres un agente que busca noticias y responde a los usuarios.   
+  Usa los resultados de la busqueda a continuación para inferir la respuesta.
   Responde la siguente pregunta de un usuario usando el resultado de la busqueda a continuacion.
   Usa un lenguaje amigable e impersonal.
   
@@ -166,7 +184,6 @@ const queryRag = async (question: string) => {
   - Limitate a solo responder y no hacer preguntas adicionales.
   - Responde usando la información mas reciente.
   - La fecha de hoy es ${todaysDate}.
-  - Limitate responder unicamente usando la información del resultado de la busqueda.
   - Responde siempre en Español
   `;
 
@@ -175,11 +192,11 @@ const queryRag = async (question: string) => {
     const geminiAnswer = await new Gemini().answerQuestion(
       system,
       question,
-      JSON.stringify(searchResults)
+      vectorDbResult
     );
     return geminiAnswer;
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 
   // Fallback to ollama
@@ -187,7 +204,7 @@ const queryRag = async (question: string) => {
     const ollamaAnswer = await new Ollama().answerQuestion(
       system,
       question,
-      JSON.stringify(searchResults)
+      vectorDbResult
     );
     return ollamaAnswer;
   } catch (error) {
@@ -206,11 +223,13 @@ app.listen(PORT, () => {
 
 app.get("/search", cors(), async (request, response) => {
   try {
+    console.log({ question: request.query.query });
     const dbResponse = await queryRag(request.query.query);
     const ragResponse = {
       Query: request.query.query,
       Response: dbResponse,
     };
+    console.log({ response: ragResponse });
     response.send(ragResponse);
   } catch (error) {
     try {
