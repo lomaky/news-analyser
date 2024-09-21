@@ -40,11 +40,11 @@ export class Ollama {
     searchResults: string
   ): Promise<string> {
     const userQuery = `
-    ${question}
+${question}
 
-    <RESULTADOS BUSQUEDA NOTICIAS>
-    ${searchResults}  
-    </RESULTADOS BUSQUEDA NOTICIAS>
+<RESULTADOS BUSQUEDA NOTICIAS>
+${searchResults}  
+</RESULTADOS BUSQUEDA NOTICIAS>
     `;
     const promptSummaryRequest: chat = {
       model: "llama3.1",
@@ -107,19 +107,20 @@ export class Gemini {
       safetySettings: safetySettings,
     });
 
-    const geminiPrompt = `
-    <INSTRUCCIONES DEL PROMPT>
-    ${system}
-    </INSTRUCCIONES DEL PROMPT>
+    const geminiPrompt = `<INSTRUCCIONES DEL PROMPT>
+${system}
+</INSTRUCCIONES DEL PROMPT>
 
-    <PREGUNTA DEL USUARIO>
-    ${question}
-    </PREGUNTA DEL USUARIO>
+<PREGUNTA DEL USUARIO>
+${question}
+</PREGUNTA DEL USUARIO>
 
-    <RESULTADOS BUSQUEDA NOTICIAS>
-    ${searchResults}  
-    </RESULTADOS BUSQUEDA NOTICIAS>
-    `;
+<RESULTADOS BUSQUEDA NOTICIAS>
+${searchResults}  
+</RESULTADOS BUSQUEDA NOTICIAS>
+`;
+
+    console.log({ prompt: geminiPrompt });
 
     const result = await model.generateContent(geminiPrompt);
     const response = result.response.text();
@@ -162,8 +163,10 @@ const queryRag = async (question: string) => {
     console.log({ vectorResults: searchResults.documents[0].length });
     for (const document of searchResults.documents[0]) {
       vectorDbResult += `
----
 ${document}
+
+---
+
 `;
     }
   }
@@ -174,17 +177,17 @@ ${document}
     .toLocaleString(DateTime.DATE_HUGE);
 
   const system = `
-  Eres un agente que busca noticias y responde a los usuarios.   
-  Usa los resultados de la busqueda a continuación para inferir la respuesta.
-  Responde la siguente pregunta de un usuario usando el resultado de la busqueda a continuacion.
-  Usa un lenguaje amigable e impersonal.
-  
-  Al responder sigue las siguentes reglas.
-  - Omite links a paginas web.
-  - Limitate a solo responder y no hacer preguntas adicionales.
-  - Responde usando la información mas reciente.
-  - La fecha de hoy es ${todaysDate}.
-  - Responde siempre en Español
+Eres un agente que busca noticias y responde a los usuarios.   
+Usa los resultados de la busqueda a continuación para inferir la respuesta.
+Responde la siguente pregunta de un usuario usando el resultado de la busqueda a continuacion.
+Usa un lenguaje amigable e impersonal.
+
+Al responder sigue las siguentes reglas.
+- Omite links a paginas web.
+- Limitate a solo responder y no hacer preguntas adicionales.
+- Responde usando la información mas reciente.
+- La fecha de hoy es ${todaysDate}.
+- Responde siempre en Español
   `;
 
   // Try gemini first
@@ -222,12 +225,14 @@ app.listen(PORT, () => {
 });
 
 app.get("/search", cors(), async (request, response) => {
+  let ip = request.headers["x-forwarded-for"] || request.socket.remoteAddress;
   try {
     console.log({ question: request.query.query });
     const dbResponse = await queryRag(request.query.query);
     const ragResponse = {
       Query: request.query.query,
       Response: dbResponse,
+      Ip: ip,
     };
     console.log({ response: ragResponse });
     response.send(ragResponse);
@@ -238,6 +243,7 @@ app.get("/search", cors(), async (request, response) => {
         Query: request?.query?.query ?? "",
         Response:
           "Lo siento, en este momento no puedo responder esta pregunta, intenta mas tarde o intenta una pregunta distinta.",
+        Ip: ip,
       });
     } catch (err) {
       console.error(err);
