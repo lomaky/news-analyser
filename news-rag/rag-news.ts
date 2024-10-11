@@ -55,7 +55,7 @@ ${content}`;
       stream: false,
     };
     const llmHeaders = new Headers();
-    llmHeaders.append("Content-Type", "application/json");    
+    llmHeaders.append("Content-Type", "application/json");
     const summaryResult = await fetch(`${llmChatEndpoint}`, {
       method: "POST",
       headers: llmHeaders,
@@ -63,7 +63,7 @@ ${content}`;
       redirect: "follow",
     });
     const summaryResponse = (await summaryResult.json())?.choices[0].message
-      ?.content as string | undefined; 
+      ?.content as string | undefined;
 
     return summaryResponse ?? "";
   }
@@ -171,9 +171,7 @@ const main = async () => {
           // Generate questions
           // Try gemini first
           try {
-            questions = await new Gemini().generateQuestions(
-              article.content
-            );
+            questions = await new Gemini().generateQuestions(article.content);
           } catch (error) {
             console.error(error);
             // Fallback to ollama
