@@ -1,12 +1,12 @@
 import { article } from "./models/eltiempo-article";
 import { ElTiempoScraperV2 } from "./lib/eltiempo-scraper-v2";
 import { ArticleDatabase } from "./lib/article-db";
-import { NewsAnalyser } from "./lib/news-analyser";
 import { S3uploader } from "./lib/s3-uploader";
+import { NewsAnalyserLMStudio } from "./lib/news-analyser-lmstudio";
 
 const main = async () => {
   const eltiempoScraper = new ElTiempoScraperV2();
-  const newsAnalyser = new NewsAnalyser();
+  const newsAnalyser = new NewsAnalyserLMStudio();
   const articleDatabase = new ArticleDatabase();
   const s3Uploader = new S3uploader();
   const articlesForAnalysis: article[] = [];
@@ -47,7 +47,7 @@ const main = async () => {
               }
             } else {
               console.log(`Retrieving from database [${savedArticle.title}`);
-              savedArticle.summary = newsAnalyser.cleanSummary(savedArticle.summary??'');
+              savedArticle.summary = savedArticle.summary ?? "";
               articlesForAnalysis.push(savedArticle);
             }
           }

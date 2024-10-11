@@ -2,7 +2,7 @@ import { analysis } from "../models/analysis-result";
 import { article } from "../models/eltiempo-article";
 import { chat } from "../models/ollama-prompt";
 
-export class NewsAnalyser {
+export class NewsAnalyserOllama {
   llmChatEndpoint = "http://localhost:11434/api/chat";
 
   constructor() {}

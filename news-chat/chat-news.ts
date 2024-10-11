@@ -3,12 +3,12 @@ var cors = require("cors");
 import { DateTime } from "luxon";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChromaClient, GoogleGenerativeAiEmbeddingFunction } from "chromadb";
+import { Credentials } from "./credentials/credentials";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Parameters
-const googleKey = "GOOGLE_KEY_HERE";
 const vectorDbName = `news-text-embedding-004-v20240914_001.vdb`;
-const llmChatEndpoint = "http://localhost:11434/api/chat";
+const llmChatEndpoint = "http://localhost:1234/v1/chat/completions";
 const chromadb = "http://192.168.86.100:8000";
 const textEmbedding = "text-embedding-004";
 
@@ -60,13 +60,16 @@ ${searchResults}
       ],
       stream: false,
     };
+    const llmHeaders = new Headers();
+    llmHeaders.append("Content-Type", "application/json");
     const summaryResult = await fetch(`${llmChatEndpoint}`, {
       method: "POST",
+      headers: llmHeaders,
       body: JSON.stringify(promptSummaryRequest),
+      redirect: "follow",
     });
-    const summaryResponse = (await summaryResult.json())?.message?.content as
-      | string
-      | undefined;
+    const summaryResponse = (await summaryResult.json())?.choices[0].message
+      ?.content as string | undefined; 
 
     return summaryResponse ?? "";
   }
@@ -82,7 +85,7 @@ export class Gemini {
     question: string,
     searchResults: string
   ): Promise<string> {
-    const genAI = new GoogleGenerativeAI(googleKey);
+    const genAI = new GoogleGenerativeAI(Credentials.Gemini);
     const safetySettings = [
       {
         category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -132,7 +135,7 @@ ${searchResults}
 const queryRag = async (question: string) => {
   // embeddings
   const googleEmbeddings = new GoogleGenerativeAiEmbeddingFunction({
-    googleApiKey: googleKey,
+    googleApiKey: Credentials.Gemini,
     model: textEmbedding,
   });
 
