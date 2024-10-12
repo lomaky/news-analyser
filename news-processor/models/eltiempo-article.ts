@@ -6,6 +6,8 @@ export interface article {
   url?: string;
   content?: string;
   summary?: string;
+  englishTitle?: string;
+  englishSummary?: string;
   positive?: boolean;
   sentiment?: string;
   weight?: number;

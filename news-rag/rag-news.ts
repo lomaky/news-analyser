@@ -8,6 +8,7 @@ import { Article } from "./models/article";
 import { Credentials } from "./credentials/credentials";
 
 const vectorDbName = `news-text-embedding-004-v20240914_001.vdb`;
+const vectorDbNameEnglish = `news-text-embedding-004-v20241012_en_001.vdb`;
 const llmChatEndpoint = "http://localhost:1234/v1/chat/completions";
 const chromadb = "http://192.168.86.100:8000";
 const textEmbedding = "text-embedding-004";
@@ -41,11 +42,45 @@ Crea 6 preguntas relacionadas al siguiente articulo. retorna solo las preguntas 
 
 ${content}`;
     const promptSummaryRequest: chat = {
-      model: "llama3.1",
+      model: "mlx-community/Llama-3.2-3B-Instruct-4bit",
       messages: [
         {
           role: "system",
           content: "Eres un asistente que genera preguntas para mejorar RAG",
+        },
+        {
+          role: "user",
+          content: userQuery ?? "",
+        },
+      ],
+      stream: false,
+    };
+    const llmHeaders = new Headers();
+    llmHeaders.append("Content-Type", "application/json");
+    const summaryResult = await fetch(`${llmChatEndpoint}`, {
+      method: "POST",
+      headers: llmHeaders,
+      body: JSON.stringify(promptSummaryRequest),
+      redirect: "follow",
+    });
+    const summaryResponse = (await summaryResult.json())?.choices[0].message
+      ?.content as string | undefined;
+
+    return summaryResponse ?? "";
+  }
+
+  async generateQuestionsEnglish(content: string): Promise<string> {
+    const userQuery = `
+Generate 6 questions related to the following news article. return only the questions without their responses or any additional text:
+
+${content}`;
+    const promptSummaryRequest: chat = {
+      model: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an assistant that generates questions to improve RAG Results.",
         },
         {
           role: "user",
@@ -113,6 +148,46 @@ ${content}`;
     console.log({ tokens: result.response.usageMetadata.totalTokenCount });
     return response;
   }
+
+  async generateQuestionsEnglish(content: string): Promise<string> {
+    const genAI = new GoogleGenerativeAI(Credentials.Gemini);
+    const safetySettings = [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_NONE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_NONE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_NONE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_NONE,
+      },
+    ];
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction:
+        "You are an assistant that generates questions to improve RAG Results.",
+      safetySettings: safetySettings,
+    });
+
+    const geminiPrompt = `
+Generate 6 questions related to the following news article. return only the questions without their responses or any additional text:
+
+${content}`;
+
+    console.log({ prompt: geminiPrompt });
+
+    const result = await model.generateContent(geminiPrompt);
+    const response = result.response.text();
+    console.log({ tokens: result.response.usageMetadata.totalTokenCount });
+    return response;
+  }
 }
 
 const main = async () => {
@@ -140,11 +215,18 @@ const main = async () => {
     embeddingFunction: googleEmbeddings,
   });
 
+  // Get or create new VectorDB collection English
+  const vectorDbEnglish = await client.getOrCreateCollection({
+    name: vectorDbNameEnglish,
+    embeddingFunction: googleEmbeddings,
+  });
+
   const files = fs
     .readdirSync(articlesPath)
     .filter((file) => path.extname(file) === ".json");
 
   for (const path of files) {
+    // Vectorize Spanish version
     try {
       const file = `${articlesRelativePath}${path}`;
       console.log(file);
@@ -207,6 +289,85 @@ ${questions}
           await new Promise((resolve) => setTimeout(resolve, 300));
         } else {
           console.log(`Already vectorized: [${articleDate}] ${article.title!}`);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    // Vectorize English version
+    try {
+      const file = `${articlesRelativePath}${path}`;
+      console.log(file);
+
+      const data = fs.readFileSync(file);
+      const article = JSON.parse(data) as Article;
+
+      if (
+        article &&
+        article.id &&
+        article.englishTitle &&
+        article.englishSummary &&
+        article.date
+      ) {
+        const articleExists = await vectorDbEnglish.get({
+          ids: [article.id!.toString()],
+        });
+        const articleDate = DateTime.fromISO(article.date!)
+          .setZone("America/Bogota")
+          .setLocale("en")
+          .toLocaleString(DateTime.DATE_HUGE);
+        if (!articleExists || articleExists.ids.length < 1) {
+          let questions = "";
+          // Generate questions
+          // Try gemini first
+          try {
+            questions = await new Gemini().generateQuestionsEnglish(
+              `#${article.englishTitle}
+
+              ${article.englishSummary}`
+            );
+          } catch (error) {
+            console.error(error);
+            // Fallback to ollama
+            try {
+              questions = await new Ollama().generateQuestionsEnglish(
+                `#${article.englishTitle}
+
+              ${article.englishSummary}`
+              );
+            } catch (error) {
+              console.log(error);
+            }
+          }
+          // Organise content
+          const content = `# ${article.englishTitle} 
+*${articleDate}*
+
+${article.englishSummary!}
+
+## Potential questions answered in this article:
+${questions}
+        `;
+          // Vectorize article
+          await vectorDbEnglish.upsert({
+            ids: [article.id!.toString()],
+            documents: [content],
+            metadatas: [
+              {
+                title: article.englishTitle!,
+                date: new Date(article.date!).toISOString(),
+                url: article.url ?? "",
+              },
+            ],
+          });
+
+          console.log(`[${articleDate}] ${article.englishTitle!}`);
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        } else {
+          console.log(
+            `Already vectorized: [${articleDate}] ${article.englishTitle!}`
+          );
         }
       }
     } catch (error) {

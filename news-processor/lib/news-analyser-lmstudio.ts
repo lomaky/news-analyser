@@ -83,9 +83,8 @@ export class NewsAnalyserLMStudio {
       body: JSON.stringify(promptSummaryRequest),
       redirect: "follow",
     });
-    const summaryResponse = (await summaryResult.json())?.choices[0].message?.content as
-      | string
-      | undefined;    
+    const summaryResponse = (await summaryResult.json())?.choices[0].message
+      ?.content as string | undefined;
 
     article.summary = summaryResponse?.trim();
 
@@ -125,6 +124,62 @@ export class NewsAnalyserLMStudio {
       article.sentiment = "neutra";
       article.positive = false;
     }
+
+    // Translate title
+    const promptTranslateTitleRequest: chat = {
+      model: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an agent that translates news titles from Spanish to English. Avoid adding any other text than the translated one.",
+        },
+        {
+          role: "user",
+          content: article.title ?? "",
+        },
+      ],
+      stream: false,
+    };
+
+    const titleTranslationResult = await fetch(`${this.llmChatEndpoint}`, {
+      method: "POST",
+      headers: llmHeaders,
+      body: JSON.stringify(promptTranslateTitleRequest),
+      redirect: "follow",
+    });
+    const titleTranslationResponse = (await titleTranslationResult.json())
+      ?.choices[0].message?.content as string | undefined;
+
+    article.englishTitle = titleTranslationResponse?.trim();
+
+    // Translate title
+    const promptTranslateRequest: chat = {
+      model: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an agent that translates news from Spanish to English. Avoid adding any other text than the translated one.",
+        },
+        {
+          role: "user",
+          content: article.summary ?? "",
+        },
+      ],
+      stream: false,
+    };
+
+    const newsTranslationResult = await fetch(`${this.llmChatEndpoint}`, {
+      method: "POST",
+      headers: llmHeaders,
+      body: JSON.stringify(promptTranslateRequest),
+      redirect: "follow",
+    });
+    const newsTranslationResponse = (await newsTranslationResult.json())
+      ?.choices[0].message?.content as string | undefined;
+
+    article.englishSummary = newsTranslationResponse?.trim();
 
     return article;
   }
