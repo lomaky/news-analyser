@@ -17,6 +17,8 @@ export class NewsAnalyserLMStudio {
         neutrals: 0,
         positiveIndex: 0,
         updated: new Date(),
+        podcast: undefined,
+        podcastAudioFile: ''
       };
 
       let weightIndex = 10000000;
@@ -199,5 +201,4 @@ export class NewsAnalyserLMStudio {
     }
     return false;
   }
-
 }

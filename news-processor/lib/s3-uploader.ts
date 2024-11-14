@@ -1,6 +1,7 @@
 import { analysis } from "../models/analysis-result";
 var propertiesReader = require("properties-reader");
 var properties = propertiesReader(".properties");
+const fs = require("fs");
 
 import {
   S3Client,
@@ -15,10 +16,29 @@ export class S3uploader {
   private region: string;
 
   constructor() {
-    this.accessKeyId = properties.get("S3.accessKeyId");
-    this.secretAccessKey = properties.get("S3.secretAccessKey");
-    this.bucket = properties.get("S3.bucket");
-    this.region = properties.get("S3.region");
+    this.accessKeyId = properties.get("AWS.accessKeyId");
+    this.secretAccessKey = properties.get("AWS.secretAccessKey");
+    this.bucket = properties.get("AWS.bucket");
+    this.region = properties.get("AWS.region");
+  }
+
+  async uploadPodcast(podcastFile: string): Promise<string> {
+    try {
+        // upload latest
+        await this.uploadFileToS3(
+          fs.readFileSync(podcastFile),
+          "latest_podcast.mp3"
+        );
+        // upload this version
+        await this.uploadFileToS3(
+          fs.readFileSync(podcastFile),
+          podcastFile + ".mp3"
+        );
+      
+    } catch (error) {
+      console.error(error);
+    }
+    return "";
   }
 
   async uploadAnalysis(analysis: analysis): Promise<string> {
@@ -61,5 +81,4 @@ export class S3uploader {
       })
     );
   }
-
 }
