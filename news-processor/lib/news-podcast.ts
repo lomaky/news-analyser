@@ -34,9 +34,10 @@ export class NewsPodcast {
 
   async generatePodcastObject(analysis: analysis): Promise<string> {
     try {
-      if (analysis?.articles?.length > 12) {
+      const podcastNewsQty = 10;
+      if (analysis?.articles?.length > podcastNewsQty) {
         let newsMd = "";
-        for (let index = 0; index < 12; index++) {
+        for (let index = 0; index < podcastNewsQty; index++) {
           const article = analysis.articles[index];
           newsMd += `**${article.title}**\n\n`;
           newsMd += `${article.summary}\n\n`;
