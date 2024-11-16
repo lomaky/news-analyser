@@ -72,7 +72,7 @@ export class NewsPodcast {
             properties: {
               Speaker: {
                 type: SchemaType.STRING,
-                description: "Name of the speaker, Peter or Jane",
+                description: "Name of the speaker, Oscar or Jane",
                 nullable: false,
               },
               Text: {
@@ -87,7 +87,7 @@ export class NewsPodcast {
         const model = genAI.getGenerativeModel({
           model: "gemini-1.5-flash",
           systemInstruction:
-            'You are an assistant that creates the script in ENGLISH for a daily podcast between 2 people discussing the news from Colombia. first speaker is "Peter", second speaker is "Jane"',
+            'You are an assistant that creates the script in ENGLISH for a daily podcast between 2 people discussing the news from Colombia. first speaker is "Oscar", second speaker is "Jane"',
           safetySettings: safetySettings,
           generationConfig: {
             responseMimeType: "application/json",
@@ -99,7 +99,7 @@ export class NewsPodcast {
           },
         });
 
-        let geminiPrompt = `Create the script for a daily podcast in ENGLISH between 2 people discussing the following news from Colombia. Start the conversation with Jane saying 'Welcome to the Colombia times daily podcast' first speaker is 'Peter', second speaker is 'Jane'. Return the script in JSON.\n\n`;
+        let geminiPrompt = `Create the script for a daily podcast in ENGLISH between 2 people discussing the following news from Colombia. Start the conversation with Jane saying 'Welcome to the Colombia times daily podcast' first speaker is 'Oscar', second speaker is 'Jane'. Return the script in JSON.\n\n`;
         geminiPrompt += "News:\n\n";
         geminiPrompt += newsMd;
         const result = await model.generateContent(geminiPrompt);
