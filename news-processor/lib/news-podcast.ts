@@ -6,6 +6,7 @@ import {
   SchemaType,
 } from "@google/generative-ai";
 import { PollySynthetiser } from "./polly";
+import { DateTime } from "luxon";
 var propertiesReader = require("properties-reader");
 var properties = propertiesReader(".properties");
 
@@ -25,11 +26,11 @@ export class NewsPodcast {
         );
         fileParts.push(fileDialog);
       }
-      const podcastFile = await polly.stitchPodcastAudio(fileParts);      
+      const podcastFile = await polly.stitchPodcastAudio(fileParts);
       console.log(podcastFile);
       return podcastFile;
-    }    
-    return '';
+    }
+    return "";
   }
 
   async generatePodcastObject(analysis: analysis): Promise<string> {
@@ -99,7 +100,17 @@ export class NewsPodcast {
           },
         });
 
-        let geminiPrompt = `Create the script for a daily podcast in ENGLISH between 2 people discussing the following news from Colombia. Start the conversation with Jane saying 'Welcome to the Colombia times daily podcast' first speaker is 'Oscar', second speaker is 'Jane'. Return the script in JSON.\n\n`;
+        const todaysDate = new DateTime(new Date())
+          .setZone("America/Bogota")
+          .setLocale("en")
+          .toLocaleString(DateTime.DATE_HUGE);
+
+        let geminiPrompt = `Follow the following rules when creating the podcast script.
+          - Create the script for a daily podcast in ENGLISH between 2 people discussing the following news from Colombia.
+          - Today's date is ${todaysDate}.
+          - Start the conversation with Jane saying 'Welcome to the Colombia times daily podcast' followed by mentioning today's date.
+          - First speaker is 'Oscar', second speaker is 'Jane'.
+          - Return the script in JSON.\n\n`;
         geminiPrompt += "News:\n\n";
         geminiPrompt += newsMd;
         const result = await model.generateContent(geminiPrompt);
