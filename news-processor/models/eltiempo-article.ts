@@ -1,6 +1,7 @@
 export interface article {
   title?: string;
   date?: Date;
+  dateModified?: Date;
   id?: string;
   category?: string;
   url?: string;

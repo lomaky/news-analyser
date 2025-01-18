@@ -14,7 +14,7 @@ const main = async () => {
 
   try {
     // Get homepage articles
-    const articles = await eltiempoScraper.getHomepageArticles();
+    const articles = await eltiempoScraper.getHomepageArticlesJson();
     if (articles?.length) {
       console.log(`Found ${articles.length} articles.`);
       // Get articles data
@@ -28,7 +28,11 @@ const main = async () => {
             const savedArticle = await articleDatabase.getArticle(
               article.id ?? ""
             );
-            if (!savedArticle) {
+            if (
+              !savedArticle ||
+              (savedArticle &&
+                savedArticle.dateModified !== article.dateModified)
+            ) {
               // visit article and get content
               const completeArticle =
                 await eltiempoScraper.getArticleContent(article);
@@ -36,7 +40,7 @@ const main = async () => {
               if (completeArticle) {
                 if (await newsAnalyser.validArticle(completeArticle)) {
                   console.log(
-                    `Analysing new article [${completeArticle.title}]`
+                    `Analysing new/updated article [${completeArticle.title}]`
                   );
                   const analysedArticle =
                     await newsAnalyser.analyseArticle(article);
@@ -73,18 +77,18 @@ const main = async () => {
         console.log(`Creating podcast audio`);
         const podcastAudioFile =
           await podcastGenerator.generatePodcastAudioFile(analysisResult!);
-          analysisResult!.podcastAudioFile = podcastAudioFile;
+        analysisResult!.podcastAudioFile = podcastAudioFile;
       } catch (error) {
         console.error(error);
       }
       // Upload to S3
       console.log(`Uploading analysis to s3`);
-      await s3Uploader.uploadAnalysis(analysisResult!);      
-      if (analysisResult?.podcastAudioFile?.length){
+      await s3Uploader.uploadAnalysis(analysisResult!);
+      if (analysisResult?.podcastAudioFile?.length) {
         console.log(`Uploading podcast to s3`);
         await s3Uploader.uploadPodcast(analysisResult.podcastAudioFile);
       }
-      
+
       // Upload to S3
       console.log(`Done.`);
     } else {
