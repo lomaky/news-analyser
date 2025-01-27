@@ -30,9 +30,9 @@ export class PollySynthetiser {
   ): Promise<string> {
     const command = new SynthesizeSpeechCommand({
       OutputFormat: "mp3",
-      SampleRate: "8000",
+      SampleRate: "24000",
       Text: text,
-      Engine: "neural",
+      Engine: "generative",
       TextType: "text",
       VoiceId: isFemaleVoice ? "Danielle" : "Stephen",
     });

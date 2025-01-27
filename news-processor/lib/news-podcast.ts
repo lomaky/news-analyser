@@ -109,6 +109,7 @@ export class NewsPodcast {
           - Create the script for a daily podcast in ENGLISH between 2 people discussing the following news from Colombia.
           - Today's date is ${todaysDate}.
           - Start the conversation with Jane saying 'Welcome to the Colombia times daily podcast' followed by mentioning today's date.
+          - Before starting with the news remindg and invite listeners to visit our website for the latest colombian news at colombiatimes.co where they can also chat with the news using AI.
           - First speaker is 'Oscar', second speaker is 'Jane'.
           - Return the script in JSON.\n\n`;
         geminiPrompt += "News:\n\n";
