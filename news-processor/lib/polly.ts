@@ -53,7 +53,7 @@ export class PollySynthetiser {
       console.log(`Appending ${part}...`);
       let stream = fs.createReadStream(part);
       stream.pipe(podcastAudio, { end: false });
-      await this.sleep(500);
+      await this.sleep(1000);
     }
     // delete parts
     try {
