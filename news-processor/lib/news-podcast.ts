@@ -110,7 +110,7 @@ export class NewsPodcast {
           - Today's date is ${todaysDate}.
           - Start the conversation with Jane saying 'Welcome to the Colombia times daily podcast' followed by mentioning today's date.
           - Before starting with the news remindg and invite listeners to visit our website for the latest colombian news at colombiatimes.co where they can also chat with the news using AI.
-          - First speaker is 'Oscar', second speaker is 'Jane'.
+          - First speaker is 'Oscar', second speaker is 'Jane', introduce themselves after inviting listeners to the website.
           - Return the script in JSON.\n\n`;
         geminiPrompt += "News:\n\n";
         geminiPrompt += newsMd;
