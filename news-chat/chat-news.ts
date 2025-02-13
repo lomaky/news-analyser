@@ -32,7 +32,7 @@ export interface message {
 }
 export class Ollama {
   constructor() {
-    console.log({ llm: "ollama" });
+    // console.log({ llm: "ollama" });
   }
 
   async answerQuestion(
@@ -118,7 +118,7 @@ ${searchResults}
 
 export class Gemini {
   constructor() {
-    console.log({ llm: "gemini" });
+    // console.log({ llm: "gemini" });
   }
 
   async answerQuestion(
@@ -164,11 +164,11 @@ ${searchResults}
 </RESULTADOS BUSQUEDA NOTICIAS>
 `;
 
-    console.log({ prompt: geminiPrompt });
+    // console.log({ prompt: geminiPrompt });
 
     const result = await model.generateContent(geminiPrompt);
     const response = result.response.text();
-    console.log({ tokens: result.response.usageMetadata.totalTokenCount });
+    // console.log({ tokens: result.response.usageMetadata.totalTokenCount });
     return response;
   }
 
@@ -215,11 +215,11 @@ ${searchResults}
 </RAG SEARCH RESULTS>
 `;
 
-    console.log({ prompt: geminiPrompt });
+    // console.log({ prompt: geminiPrompt });
 
     const result = await model.generateContent(geminiPrompt);
     const response = result.response.text();
-    console.log({ tokens: result.response.usageMetadata.totalTokenCount });
+    // console.log({ tokens: result.response.usageMetadata.totalTokenCount });
     return response;
   }
 }
@@ -255,7 +255,7 @@ const queryRag = async (question: string) => {
     searchResults.documents.length &&
     searchResults.documents[0].length
   ) {
-    console.log({ vectorResults: searchResults.documents[0].length });
+    // console.log({ vectorResults: searchResults.documents[0].length });
     for (const document of searchResults.documents[0]) {
       vectorDbResult += `
 ${document}
@@ -306,7 +306,7 @@ Al responder sigue las siguentes reglas.
     );
     return ollamaAnswer;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
   }
 
   return "Lo siento, en este momento no puedo responder esta pregunta, intenta mas tarde o intenta una pregunta distinta.";
@@ -343,7 +343,7 @@ const queryRagEnglish = async (question: string) => {
     searchResults.documents.length &&
     searchResults.documents[0].length
   ) {
-    console.log({ vectorResults: searchResults.documents[0].length });
+    // console.log({ vectorResults: searchResults.documents[0].length });
     for (const document of searchResults.documents[0]) {
       vectorDbResult += `
 ${document}
@@ -394,7 +394,7 @@ Follow the following rules when composing the answer.
     );
     return ollamaAnswer;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
   }
 
   return "Lo siento, en este momento no puedo responder esta pregunta, intenta mas tarde o intenta una pregunta distinta.";
@@ -404,13 +404,13 @@ const app = express();
 app.use(express.json());
 const PORT = 9700;
 app.listen(PORT, () => {
-  console.log("Server Listening on port:", PORT);
+  // console.log("Server Listening on port:", PORT);
 });
 
 app.get("/search", cors(), async (request, response) => {
   let ip = request.headers["x-forwarded-for"] || request.socket.remoteAddress;
   try {
-    console.log({ question: request.query.query });
+    // console.log({ question: request.query.query });
     const dbResponse = await queryRag(request.query.query);
     const ragResponse = {
       Query: request.query.query,
@@ -437,7 +437,7 @@ app.get("/search", cors(), async (request, response) => {
 app.get("/search-en", cors(), async (request, response) => {
   let ip = request.headers["x-forwarded-for"] || request.socket.remoteAddress;
   try {
-    console.log({ question: request.query.query });
+    // console.log({ question: request.query.query });
     const dbResponse = await queryRagEnglish(request.query.query);
     const ragResponse = {
       Query: request.query.query,
