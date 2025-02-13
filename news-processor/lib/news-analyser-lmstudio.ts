@@ -8,9 +8,11 @@ export class NewsAnalyserLMStudio {
   constructor() {}
 
   async generateAnalysis(articles: article[]): Promise<analysis | null> {
+    const samplesQuestions = 3;
     if (articles?.length) {
       const analysis: analysis = {
         articles: [],
+        chatsamples: [],
         total: 0,
         positives: 0,
         negatives: 0,
@@ -18,7 +20,7 @@ export class NewsAnalyserLMStudio {
         positiveIndex: 0,
         updated: new Date(),
         podcast: undefined,
-        podcastAudioFile: ''
+        podcastAudioFile: "",
       };
 
       let weightIndex = 10000000;
@@ -37,6 +39,13 @@ export class NewsAnalyserLMStudio {
             : 0;
         analysis.positives += articles[index].positive ? 1 : 0;
         analysis.negatives += articles[index].positive === false ? 1 : 0;
+
+        if (index < samplesQuestions && articles[index].englishSummary) {
+          const sampleQuestion = await this.generateSampleQuestion(
+            articles[index].englishSummary!
+          );
+          analysis.chatsamples.push(sampleQuestion);
+        }
       }
       analysis.total = analysis.articles.length;
       analysis.positiveIndex = Math.round(
@@ -45,6 +54,40 @@ export class NewsAnalyserLMStudio {
       return analysis;
     }
     return null;
+  }
+
+  async generateSampleQuestion(content: string): Promise<string> {
+    const userQuery = `
+Generate 1 question related to the following article. Make sure the question is no longer than 10 words. the question must be concised. The question will be displayed in a chatbot as an example of what can be asked. Return only the question without adding the response or any additional text:
+
+${content}`;
+    const promptSummaryRequest: chat = {
+      model: "mlx-community/Llama-3.2-3B-Instruct-4bit",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an assistant that generates questions to improve RAG Results.",
+        },
+        {
+          role: "user",
+          content: userQuery ?? "",
+        },
+      ],
+      stream: false,
+    };
+    const llmHeaders = new Headers();
+    llmHeaders.append("Content-Type", "application/json");
+    const summaryResult = await fetch(`${this.llmChatEndpoint}`, {
+      method: "POST",
+      headers: llmHeaders,
+      body: JSON.stringify(promptSummaryRequest),
+      redirect: "follow",
+    });
+    const summaryResponse = (await summaryResult.json())?.choices[0].message
+      ?.content as string | undefined;
+
+    return summaryResponse ?? "";
   }
 
   async analyseArticle(article: article): Promise<article | null> {

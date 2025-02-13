@@ -7,6 +7,7 @@ export interface Dialog {
 
 export interface analysis {
   articles: article[];
+  chatsamples: string[];
   total: number;
   positives: number;
   negatives: number;
