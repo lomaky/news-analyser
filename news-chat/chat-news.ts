@@ -5,6 +5,8 @@ import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { ChromaClient, GoogleGenerativeAiEmbeddingFunction } from "chromadb";
 import { Credentials } from "./credentials/credentials";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+import { ChatDb } from "./db/db";
+import { CONVERSATION } from "./models/conversation";
 
 // Parameters
 const vectorDbName = `news-text-embedding-004-v20240914_001.vdb`;
@@ -224,6 +226,8 @@ ${searchResults}
   }
 }
 
+const chatDb = new ChatDb();
+
 const queryRag = async (question: string) => {
   // embeddings
   const googleEmbeddings = new GoogleGenerativeAiEmbeddingFunction({
@@ -312,7 +316,17 @@ Al responder sigue las siguentes reglas.
   return "Lo siento, en este momento no puedo responder esta pregunta, intenta mas tarde o intenta una pregunta distinta.";
 };
 
-const queryRagEnglish = async (question: string) => {
+const queryRagEnglish = async (question: string, uuid: string) => {
+  const oldConversation: CONVERSATION[] =
+    await chatDb.getConversationById(uuid);
+  // Save query
+  await chatDb.saveConversationMessage({
+    ID: uuid,
+    TIMESTAMP: Date.now(),
+    ROLE: "user",
+    MESSAGE: question,
+  });
+
   // embeddings
   const googleEmbeddings = new GoogleGenerativeAiEmbeddingFunction({
     googleApiKey: Credentials.Gemini,
@@ -380,6 +394,13 @@ Follow the following rules when composing the answer.
       question,
       vectorDbResult
     );
+    // Save response
+    await chatDb.saveConversationMessage({
+      ID: uuid,
+      TIMESTAMP: Date.now(),
+      ROLE: "system",
+      MESSAGE: geminiAnswer,
+    });
     return geminiAnswer;
   } catch (error) {
     console.error(error);
@@ -392,12 +413,28 @@ Follow the following rules when composing the answer.
       question,
       vectorDbResult
     );
+    // Save response
+    await chatDb.saveConversationMessage({
+      ID: uuid,
+      TIMESTAMP: Date.now(),
+      ROLE: "system",
+      MESSAGE: ollamaAnswer,
+    });
     return ollamaAnswer;
   } catch (error) {
-    // console.log(error);
+    console.error(error);
   }
+  const errorResponse =
+    "I'm sorry, I cannot answer this question right now, please try again later.";
+  // Save response
+  await chatDb.saveConversationMessage({
+    ID: uuid,
+    TIMESTAMP: Date.now(),
+    ROLE: "system",
+    MESSAGE: errorResponse,
+  });
 
-  return "Lo siento, en este momento no puedo responder esta pregunta, intenta mas tarde o intenta una pregunta distinta.";
+  return errorResponse;
 };
 
 const app = express();
@@ -438,8 +475,12 @@ app.get("/search-en", cors(), async (request, response) => {
   let ip = request.headers["x-forwarded-for"] || request.socket.remoteAddress;
   try {
     // console.log({ question: request.query.query });
-    const dbResponse = await queryRagEnglish(request.query.query);
+    const dbResponse = await queryRagEnglish(
+      request.query.query,
+      request.query.uuid
+    );
     const ragResponse = {
+      Uuid: request.query.uuid,
       Query: request.query.query,
       Response: dbResponse,
       Ip: ip,
