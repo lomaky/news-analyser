@@ -72,3 +72,4 @@ amplifytools.xcconfig
 *.js
 .vsdbg/
 .DS_Store
+/media/temp/*.mp3
