@@ -111,6 +111,7 @@ export class NewsPodcast {
           - Start the conversation with Jane saying 'Welcome to the Colombia times daily podcast' followed by mentioning today's date.
           - Before starting with the news remindg and invite listeners to visit our website for the latest colombian news at colombiatimes.co where they can also chat with the news using AI.
           - First speaker is 'Oscar', second speaker is 'Jane', introduce themselves after inviting listeners to the website.
+          - If 2 or more news are related or talking about the same topic, talk about them and do not chat them independently.
           - Return the script in JSON.\n\n`;
         geminiPrompt += "News:\n\n";
         geminiPrompt += newsMd;

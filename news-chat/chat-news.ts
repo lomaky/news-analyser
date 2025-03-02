@@ -7,6 +7,7 @@ import { Credentials } from "./credentials/credentials";
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 import { ChatDb } from "./db/db";
 import { CONVERSATION } from "./models/conversation";
+import { v4 as uuidv4 } from "uuid";
 
 // Parameters
 const vectorDbName = `news-text-embedding-004-v20240914_001.vdb`;
@@ -80,10 +81,17 @@ ${searchResults}
   async answerQuestionEnglish(
     system: string,
     question: string,
+    conversationHistory: string | undefined,
     searchResults: string
   ): Promise<string> {
     const userQuery = `
+<CONVERSATION_HISTORY>
+${conversationHistory ?? "[]"}
+</CONVERSATION_HISTORY>
+
+<USER_QUESTION>
 ${question}
+</USER_QUESTION>
 
 <RAG SEARCH RESULTS>
 ${searchResults}  
@@ -177,6 +185,7 @@ ${searchResults}
   async answerQuestionEnglish(
     system: string,
     question: string,
+    conversationHistory: string | undefined,
     searchResults: string
   ): Promise<string> {
     const genAI = new GoogleGenerativeAI(Credentials.Gemini);
@@ -199,22 +208,25 @@ ${searchResults}
       },
     ];
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction: system,
       safetySettings: safetySettings,
     });
 
-    const geminiPrompt = `<PROMPT INSTRUCTIONS>
+    const geminiPrompt = `
 ${system}
-</PROMPT INSTRUCTIONS>
 
-<USER QUESTION>
+<CONVERSATION_HISTORY>
+${conversationHistory ?? "[]"}
+</CONVERSATION_HISTORY>
+
+<USER_QUESTION>
 ${question}
-</USER QUESTION>
+</USER_QUESTION>
 
-<RAG SEARCH RESULTS>
+<RAG_SEARCH_RESULTS>
 ${searchResults}  
-</RAG SEARCH RESULTS>
+</RAG_SEARCH_RESULTS>
 `;
 
     // console.log({ prompt: geminiPrompt });
@@ -316,15 +328,27 @@ Al responder sigue las siguentes reglas.
   return "Lo siento, en este momento no puedo responder esta pregunta, intenta mas tarde o intenta una pregunta distinta.";
 };
 
-const queryRagEnglish = async (question: string, uuid: string) => {
-  const oldConversation: CONVERSATION[] =
-    await chatDb.getConversationById(uuid);
+const queryRagEnglish = async (userQuestion: string, uuid: string) => {
+  if (!uuid) {
+    uuid = uuidv4();
+  }
+
+  // Get conversation
+  const conversation: CONVERSATION[] = await chatDb.getConversationById(uuid);
+  let conversationHistory: undefined | string = undefined;
+  if (conversation?.length) {
+    conversationHistory = "";
+    for (const chat of conversation.sort((a, b) => a.TIMESTAMP - b.TIMESTAMP)) {
+      conversationHistory += `${chat.ROLE}: ${chat.MESSAGE} \n`;
+    }
+  }
+
   // Save query
   await chatDb.saveConversationMessage({
     ID: uuid,
     TIMESTAMP: Date.now(),
     ROLE: "user",
-    MESSAGE: question,
+    MESSAGE: userQuestion,
   });
 
   // embeddings
@@ -345,20 +369,24 @@ const queryRagEnglish = async (question: string, uuid: string) => {
   });
 
   // Query
+  const vectorQuestion = conversationHistory
+    ? (conversationHistory += userQuestion)
+    : userQuestion;
+  console.log({ vectorQuestion: vectorQuestion });
   const searchResults = await vectorDb.query({
-    queryTexts: [question],
+    queryTexts: [vectorQuestion],
     nResults: 15,
   });
 
   let vectorDbResult = "";
 
+  console.log({ searchResults: searchResults });
   if (
     searchResults.documents &&
     searchResults.documents.length &&
     searchResults.documents[0].length
   ) {
-    // console.log({ vectorResults: searchResults.documents[0].length });
-    for (const document of searchResults.documents[0]) {
+    for (const document of searchResults.documents[0]) {      
       vectorDbResult += `
 ${document}
 
@@ -385,13 +413,22 @@ Follow the following rules when composing the answer.
 - Answer using the most recent information.
 - Today's date is ${todaysDate}.
 - Always answer in English.
+- If asked about the links of the articles, respond that this functionality is not yet implemented, However, all the articles are taken from reliable sources in Colombia.
+
+- Use the history of the conversation between the LLM and the user to maintain the conversation within the same context.
+- The conversation history is in the <CONVERSATION_HISTORY> tab, if the value is [], means this is the first conversation.
+
+- The user question to respond is in the <USER_QUESTION> tag.
+
+- The vector similarity search results are in the <RAG_SEARCH_RESULTS> tag.
   `;
 
   // Try gemini first
   try {
     const geminiAnswer = await new Gemini().answerQuestionEnglish(
       system,
-      question,
+      userQuestion,
+      conversationHistory,
       vectorDbResult
     );
     // Save response
@@ -410,7 +447,8 @@ Follow the following rules when composing the answer.
   try {
     const ollamaAnswer = await new Ollama().answerQuestionEnglish(
       system,
-      question,
+      userQuestion,
+      conversationHistory,
       vectorDbResult
     );
     // Save response
