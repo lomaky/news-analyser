@@ -156,7 +156,7 @@ export class Gemini {
       },
     ];
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction: system,
       safetySettings: safetySettings,
     });
@@ -413,7 +413,7 @@ Follow the following rules when composing the answer.
 - Answer using the most recent information.
 - Today's date is ${todaysDate}.
 - Always answer in English.
-- If asked about the links of the articles, respond that this functionality is not yet implemented, However, all the articles are taken from reliable sources in Colombia.
+- The answers must be unbiased and offer a clear and impartial response.
 
 - Use the history of the conversation between the LLM and the user to maintain the conversation within the same context.
 - The conversation history is in the <CONVERSATION_HISTORY> tab, if the value is [], means this is the first conversation.

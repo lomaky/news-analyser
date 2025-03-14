@@ -130,7 +130,7 @@ export class Gemini {
       },
     ];
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction:
         "Eres un asistente que genera preguntas para mejorar RAG",
       safetySettings: safetySettings,
@@ -170,7 +170,7 @@ ${content}`;
       },
     ];
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction:
         "You are an assistant that generates questions to improve RAG Results.",
       safetySettings: safetySettings,

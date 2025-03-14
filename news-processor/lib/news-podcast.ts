@@ -86,7 +86,7 @@ export class NewsPodcast {
           },
         };
         const model = genAI.getGenerativeModel({
-          model: "gemini-1.5-flash",
+          model: "gemini-2.0-flash",
           systemInstruction:
             'You are an assistant that creates the script in ENGLISH for a daily podcast between 2 people discussing the news from Colombia. first speaker is "Oscar", second speaker is "Jane"',
           safetySettings: safetySettings,
@@ -108,10 +108,11 @@ export class NewsPodcast {
         let geminiPrompt = `Follow the following rules when creating the podcast script.
           - Create the script for a daily podcast in ENGLISH between 2 people discussing the following news from Colombia.
           - Today's date is ${todaysDate}.
+          - The podcast must be unbiased and offer a clear and impartial recap.
           - Start the conversation with Jane saying 'Welcome to the Colombia times daily podcast' followed by mentioning today's date.
-          - Before starting with the news remindg and invite listeners to visit our website for the latest colombian news at colombiatimes.co where they can also chat with the news using AI.
+          - Before starting with the news remind and invite listeners to visit our website for the latest colombian news at colombiatimes.co where they can also chat with the news using AI.
           - First speaker is 'Oscar', second speaker is 'Jane', introduce themselves after inviting listeners to the website.
-          - If 2 or more news are related or talking about the same topic, talk about them and do not chat them independently.
+          - If 2 or more news are related or talking about the same topic, talk about them together and do not chat about them independently.
           - Return the script in JSON.\n\n`;
         geminiPrompt += "News:\n\n";
         geminiPrompt += newsMd;
