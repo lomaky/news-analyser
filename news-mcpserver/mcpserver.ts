@@ -37,6 +37,7 @@ export class NewsMcpServer extends McpServer {
       schema: z.object({
         name: z.string(),
       }),
+      tools: [NewsMcpServer.searchNewsToolSchema],
     });
     this.configureMCPServer();
   }
@@ -62,7 +63,6 @@ export class NewsMcpServer extends McpServer {
         const date = args.date as string;
         const newsApi = new NewsApi();
         const result = await newsApi.search(query, date);
-        console.log({ result });
         return result;
       }
       throw new Error("Tool not found");

@@ -24,7 +24,6 @@ export class NewsApi {
       q = `${q}. [Date: ${new Date(date).toISOString()}]`;
     }
 
-    console.log({ query: q });
     // VectorDb
     const googleEmbeddings = new GoogleGenerativeAiEmbeddingFunction({
       googleApiKey: Credentials.Gemini,
@@ -44,24 +43,20 @@ export class NewsApi {
       nResults: 15,
     });
 
-    let result = "";
+    let content: { type: string; text: string }[] = [];
+
     if (
       searchResults.documents &&
       searchResults.documents.length &&
       searchResults.documents[0].length
     ) {
       for (const document of searchResults.documents[0]) {
-        result += `
-${document}
-
----
-
-`;
+        content.push({ type: "text", text: document || "" });
       }
     }
 
     return {
-      content: [{ type: "text", text: JSON.stringify(result) }],
+      content,
     };
   }
 }
