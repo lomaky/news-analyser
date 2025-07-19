@@ -19,9 +19,19 @@ export class NewsApi {
     // Query
     let q = query;
     if (!date) {
-      q = `${q}. [Date: ${new Date().toISOString()}]`;
+      q = `${q}. [Date: ${new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })}]`;
     } else {
-      q = `${q}. [Date: ${new Date(date).toISOString()}]`;
+      q = `${q}. [Date: ${new Date(date).toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })}]`;
     }
 
     // VectorDb
